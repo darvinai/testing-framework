@@ -1,5 +1,5 @@
 # Darvin Testing Framework
-A framework for testing (Darvin.ai)[https://darvin.ai/] chatbots on [nodejs](https://nodejs.org/en/) with [jasmine](https://jasmine.github.io/edge/node.html).
+A framework for testing [Darvin.ai](https://darvin.ai/) chatbots on [nodejs](https://nodejs.org/en/) with [jasmine](https://jasmine.github.io/edge/node.html).
 
 ## Usage
 
