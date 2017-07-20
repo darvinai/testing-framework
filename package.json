@@ -1,0 +1,27 @@
+{
+  "name": "darvin-testing-framework",
+  "version": "1.0.0",
+  "description": "A framework for testing Darvin.ai bots.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darvinai/testing-framework.git"
+  },
+  "author": "Darvin.ai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darvinai/testing-framework/issues"
+  },
+  "homepage": "https://github.com/darvinai/testing-framework#readme",
+  "devDependencies": {
+    "jshint": "^2.9.5"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "node-fetch": "^1.7.1",
+    "uuid": "^3.1.0"
+  }
+}
