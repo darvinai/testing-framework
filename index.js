@@ -2,7 +2,8 @@
 
 const BbPromise = require('bluebird');
 const uuid = require('uuid/v4');
-const fetch = require('node-fetch');
+
+const fetch = require('./fetcher').fetch;
 
 class TestingFramework {
     constructor(config) {
