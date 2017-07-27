@@ -33,6 +33,15 @@ class TestingFramework {
                 that._validateScenario(spec, scenario);
                 it(scenario.it, done => that._executeScenario(spec, scenario, done));
             });
+
+            if (spec.dynamic && typeof spec.dynamic === 'function') {
+                const sender = { id: 'tempuser-' + uuid() };
+                const context = {
+                    send: message => this._send(spec, sender, message)
+                };
+
+                spec.dynamic(context);
+            }
         });
     }
 
@@ -60,16 +69,22 @@ class TestingFramework {
             id: 'tempuser-' + uuid()
         };
 
-        BbPromise.each(scenario.steps, step => that._executeStep(spec, sender, step))
+        BbPromise.each(scenario.steps, step => that._executeStep(spec, scenario, step, sender))
             .then(done)
             .catch(done.fail);
     }
 
-    _executeStep(spec, sender, step) {
+    _executeStep(spec, scenario, step, sender) {
+        const message = Object.assign({}, step.user, { mocks: Object.assign({}, scenario.mocks, step.mocks) });
+        return this._send(spec, sender, message)
+            .then(response => this._verifyStep(step, response));
+    }
+
+    _send(spec, sender, message) {
         const channelUrl = `${this._apiUrl}v1/bots/${spec.botId}/channels/${spec.channel.id}/darvin`;
-        const message = {
+        const payload = {
             sender,
-            message: step.user
+            message
         };
 
         const options = {
@@ -78,10 +93,9 @@ class TestingFramework {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${spec.channel.token}`
             },
-            body: JSON.stringify(message)
+            body: JSON.stringify(payload)
         };
 
-        const that = this;
         return fetch(channelUrl, options)
             .then(response => {
                 if (response.status < 200 || response.status >= 300) {
@@ -89,12 +103,13 @@ class TestingFramework {
                 }
 
                 return response.json();
-            })
-            .then(response => that._verifyStep(step, response));
+            });
     }
 
     _verifyStep(step, response) {
-        expect(step.bot.map(JSON.stringify)).toContain(JSON.stringify(response));
+        if (step.bot) {
+            expect(step.bot.map(JSON.stringify)).toContain(JSON.stringify(response));
+        }
     }
 }
 
