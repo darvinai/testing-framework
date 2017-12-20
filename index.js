@@ -7,7 +7,9 @@ const fetch = require('./fetcher').fetch;
 
 class TestingFramework {
     constructor(config) {
-        config = config || { apiUrl: 'https://api.darvin.ai/' };
+        config = config || {
+            apiUrl: 'https://api.darvin.ai/'
+        };
         this._apiUrl = config.apiUrl;
     }
 
@@ -36,7 +38,9 @@ class TestingFramework {
             });
 
             if (spec.dynamic && typeof spec.dynamic === 'function') {
-                const sender = { id: 'tempuser-' + uuid() };
+                const sender = {
+                    id: 'tempuser-' + uuid()
+                };
                 const context = {
                     send: message => this._send(spec, sender, message)
                 };
@@ -76,7 +80,9 @@ class TestingFramework {
     }
 
     _executeStep(spec, scenario, step, sender) {
-        const message = Object.assign({}, step.user, { mocks: Object.assign({}, scenario.mocks, step.mocks) });
+        const message = Object.assign({}, step.user, {
+            mocks: Object.assign({}, scenario.mocks, step.mocks)
+        });
         return this._send(spec, sender, message)
             .then(response => this._verifyStep(step, response));
     }
@@ -109,6 +115,12 @@ class TestingFramework {
 
     _verifyStep(step, response) {
         if (step.bot) {
+            let index = response.findIndex(m => m.type === 'event');
+            while (index >= 0) {
+                response.splice(index, 1);
+                index = response.findIndex(m => m.type === 'event');
+            }
+
             expect(step.bot.map(JSON.stringify)).toContain(JSON.stringify(response));
         }
     }
