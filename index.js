@@ -93,7 +93,8 @@ class TestingFramework {
 
     _executeStep(spec, scenario, step, sender) {
         const message = Object.assign({}, step.user, {
-            mocks: Object.assign({}, scenario.mocks, step.mocks)
+            mocks: Object.assign({}, scenario.mocks, step.mocks),
+            contextMock: Object.assign({}, spec.contextMock, scenario.contextMock, step.contextMock)
         });
         return this._send(spec, sender, message)
             .then(response => this._verifyStep(step, response));
