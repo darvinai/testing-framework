@@ -15,7 +15,7 @@ class TestingFramework {
 
     describe(spec, options) {
         if (!spec.name) {
-            throw Error(`Tried to execute a spec without a name.`);
+            throw Error('Tried to execute a spec without a name.');
         }
 
         if (!spec.scenarios) {
@@ -34,13 +34,20 @@ class TestingFramework {
 
             spec.scenarios.forEach(scenario => {
                 that._validateScenario(spec, scenario);
-                it(scenario.it, done => that._executeScenario(spec, scenario, done));
+                Object.keys(scenario).forEach(key => {
+                    switch (key) {
+                        case 'it':
+                            it(scenario.it, done => that._executeScenario(spec, scenario, done));
+                            break;
+                        case 'fit':
+                            fit(scenario.fit, done => that._executeScenario(spec, scenario, done));
+                            break;
+                    }
+                });
             });
 
             if (spec.dynamic && typeof spec.dynamic === 'function') {
-                const sender = {
-                    id: 'tempuser-' + uuid()
-                };
+                const sender = this._getSender();
                 const context = {
                     send: message => this._send(spec, sender, message)
                 };
@@ -51,12 +58,12 @@ class TestingFramework {
     }
 
     _validateScenario(spec, scenario) {
-        if (!scenario.it) {
-            throw Error(`The spec '${spec.name}' has a scenario without description in 'it'.`);
+        if (!scenario.it && !scenario.fit) {
+            throw Error(`The spec '${spec.name}' has a scenario without description in 'it' / 'fit'.`);
         }
 
         if (!scenario.steps) {
-            throw Error(`The spec '${spec.name}' has a scenario without 'steps' in it.`);
+            throw Error(`The spec '${spec.name}' has a scenario without 'steps'.`);
         }
     }
 
@@ -70,13 +77,18 @@ class TestingFramework {
         }
 
         const that = this;
-        const sender = {
-            id: 'tempuser-' + uuid()
-        };
+        const sender = this._getSender(spec.sender);
 
         BbPromise.each(scenario.steps, step => that._executeStep(spec, scenario, step, sender))
             .then(done)
             .catch(done.fail);
+    }
+
+    _getSender(sender) {
+        const name = sender && sender.name || 'test-user';
+        const id = `${sender && sender.id || name}-${sender && sender.uuid || uuid()}`;
+
+        return { id, name };
     }
 
     _executeStep(spec, scenario, step, sender) {
