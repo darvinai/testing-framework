@@ -42,6 +42,9 @@ class TestingFramework {
                         case 'fit':
                             fit(scenario.fit, done => that._executeScenario(spec, scenario, done));
                             break;
+                        case 'xit':
+                            xit(scenario.xit, done => that._executeScenario(spec, scenario, done));
+                            break;
                     }
                 });
             });
@@ -58,8 +61,8 @@ class TestingFramework {
     }
 
     _validateScenario(spec, scenario) {
-        if (!scenario.it && !scenario.fit) {
-            throw Error(`The spec '${spec.name}' has a scenario without description in 'it' / 'fit'.`);
+        if (!scenario.it && !scenario.fit && !scenario.xit) {
+            throw Error(`The spec '${spec.name}' has a scenario without description in 'it' / 'fit' / 'xit'.`);
         }
 
         if (!scenario.steps) {
@@ -93,7 +96,8 @@ class TestingFramework {
 
     _executeStep(spec, scenario, step, sender) {
         const message = Object.assign({}, step.user, {
-            mocks: Object.assign({}, scenario.mocks, step.mocks)
+            mocks: Object.assign({}, scenario.mocks, step.mocks),
+            contextMock: Object.assign({}, spec.contextMock, scenario.contextMock, step.contextMock)
         });
         return this._send(spec, sender, message)
             .then(response => this._verifyStep(step, response));
