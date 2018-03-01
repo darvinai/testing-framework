@@ -1,6 +1,6 @@
 {
   "name": "darvin-testing-framework",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A framework for testing Darvin.ai bots.",
   "main": "index.js",
   "scripts": {
