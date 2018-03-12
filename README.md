@@ -103,8 +103,24 @@ The JSON specification must have the following properties:
         - `user` - what the user says as a single message
             - `text` - text of the message
         - `bot` - what is the expected answer from the bot as an array of optional behavior. Each element is an array of messages. The step is considered valid if any sequence of messages matches the actual chatbot response
-            - `text` - text of a single message
+            - `text` - text of a single message or an array of possible messages
             - `quickReplies` - array of quick reply options
+            - `template` - an object describing complex response elements, such as buttons
+                
+                Example:
+                
+                ```json
+                "template": {
+                    "type": "button",
+                    "buttons": [{
+                        "url": "https://webviews.darvin.ai/v1/bots/BOT_ID/...",
+                        "title": "Pick country"
+                    }]
+                }
+                ```
+                
+                _Note: the 'url' is checked for starts-with instead of equality_
+                
             - `mocks` - a dictionary that allows you to mock the responses of specific URLs and HTTP actions against those URLs
                 
                 Example:
