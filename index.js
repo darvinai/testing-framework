@@ -92,7 +92,10 @@ class TestingFramework {
         const name = sender && sender.name || 'test-user';
         const id = `${sender && sender.id || name}-${sender && sender.uuid || uuid()}`;
 
-        return { id, name };
+        return {
+            id,
+            name
+        };
     }
 
     _executeStep(spec, scenario, step, sender) {
@@ -139,8 +142,75 @@ class TestingFramework {
                 index = response.findIndex(m => m.type === 'event');
             }
 
-            expect(step.bot.map(JSON.stringify)).toContain(JSON.stringify(response));
+            const isValidResponse = step.bot.some(expectedResponses => {
+                if (expectedResponses.length !== response.length) {
+                    return false;
+                }
+
+                return expectedResponses.every((expectedResponse, i) =>
+                    this._verify(expectedResponse, response[i], this._verifyResponse.bind(this)));
+            });
+
+            if (!isValidResponse) {
+                throw Error(`Unexpected response. Expected: ${JSON.stringify(step.bot)}. Actual: ${JSON.stringify(response)}`);
+            }
         }
+    }
+
+    _verify(expected, actual, validation) {
+        let keys = Object.keys(expected);
+        if (Object.keys(actual).length !== keys.length) {
+            return false;
+        }
+
+        for (const key of keys) {
+            let isValid = validation(expected, actual, key);
+
+            if (!isValid) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    _verifyResponse(expectedResponse, actualResponse, key) {
+        switch (key) {
+            case 'text':
+                const expectedText = expectedResponse.text;
+                if (Array.isArray(expectedText)) {
+                    return expectedText.includes(actualResponse.text);
+                } else {
+                    return expectedText === actualResponse.text;
+                }
+            case 'template':
+                return this._verify(expectedResponse.template, actualResponse.template, this._verifyTemplate.bind(this));
+            default:
+                return JSON.stringify(expectedResponse[key]) === JSON.stringify(actualResponse[key]);
+        };
+    }
+
+    _verifyTemplate(expectedTemplate, actualTemplate, key) {
+        switch (key) {
+            case 'buttons':
+                if (expectedTemplate.buttons.length !== actualTemplate.buttons.length) {
+                    return false;
+                }
+
+                return expectedTemplate.buttons.every((expectedButton, i) =>
+                    this._verify(expectedButton, actualTemplate.buttons[i], this._verifyTemplateButton.bind(this)));
+            default:
+                return JSON.stringify(expectedTemplate[key]) === JSON.stringify(actualTemplate[key]);
+        };
+    }
+
+    _verifyTemplateButton(expectedButton, actualButton, key) {
+        switch (key) {
+            case 'url':
+                return actualButton.url.startsWith(expectedButton.url);
+            default:
+                return JSON.stringify(expectedButton[key]) === JSON.stringify(actualButton[key]);
+        };
     }
 }
 
