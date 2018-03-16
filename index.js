@@ -1,5 +1,6 @@
 'use strict';
 
+const Handlebars = require('handlebars');
 const BbPromise = require('bluebird');
 const deepAssign = require('deep-assign');
 const uuid = require('uuid/v4');
@@ -12,6 +13,7 @@ class TestingFramework {
             apiUrl: 'https://api.darvin.ai/'
         };
         this._apiUrl = config.apiUrl;
+        this._handlebars = Handlebars.create();
     }
 
     describe(spec, options) {
@@ -33,8 +35,22 @@ class TestingFramework {
                 afterAll(options.teardown);
             }
 
+            if (spec.parameters) {
+                this._validateParameters(spec.parameters);
+            }
+
             spec.scenarios.forEach(scenario => {
                 that._validateScenario(spec, scenario);
+
+                if (scenario.parameters) {
+                    this._validateParameters(scenario.parameters);
+                    Object.assign(scenario.parameters, parameters);
+                }
+
+                if (spec.parameters) {
+                    scenario.parameters = Object.assign({}, spec.parameters, scenario.parameters);
+                }
+
                 Object.keys(scenario).forEach(key => {
                     switch (key) {
                         case 'it':
@@ -57,6 +73,14 @@ class TestingFramework {
                 };
 
                 spec.dynamic(context);
+            }
+        });
+    }
+
+    _validateParameters(parameters) {
+        Object.keys(parameters).forEach(parameter => {
+            if (typeof parameters[parameter] !== 'string') {
+                throw Error(`Only string parameters are allowed, the invalid parameter is "${parameter}".`)
             }
         });
     }
@@ -99,13 +123,15 @@ class TestingFramework {
     }
 
     _executeStep(spec, scenario, step, sender) {
-        const message = Object.assign({}, step.user, {
+        let message = Object.assign({}, step.user, {
             mocks: deepAssign({}, spec.mocks, scenario.mocks, step.mocks),
             contextMock: deepAssign({}, spec.contextMock, scenario.contextMock, step.contextMock)
         });
 
+        message = this._formatMessage(message, scenario.parameters);
+
         return this._send(spec, sender, message)
-            .then(response => this._verifyStep(step, response));
+            .then(response => this._verifyStep(step, response, scenario.parameters));
     }
 
     _send(spec, sender, message) {
@@ -134,7 +160,7 @@ class TestingFramework {
             });
     }
 
-    _verifyStep(step, response) {
+    _verifyStep(step, response, context) {
         if (step.bot) {
             let index = response.findIndex(m => m.type === 'event');
             while (index >= 0) {
@@ -147,8 +173,9 @@ class TestingFramework {
                     return false;
                 }
 
-                return expectedResponses.every((expectedResponse, i) =>
-                    this._verify(expectedResponse, response[i], this._verifyResponse.bind(this)));
+                return expectedResponses.map(response => this._formatMessage(response, context))
+                    .every((expectedResponse, i) =>
+                        this._verify(expectedResponse, response[i], this._verifyResponse.bind(this)));
             });
 
             if (!isValidResponse) {
@@ -211,6 +238,14 @@ class TestingFramework {
             default:
                 return JSON.stringify(expectedButton[key]) === JSON.stringify(actualButton[key]);
         };
+    }
+
+    _formatMessage(message, context) {
+        if (!context || Object.keys(context) === 0) {
+            return message;
+        }
+
+        return JSON.parse(this._handlebars.compile(JSON.stringify(message), { noEscape: true })(context));
     }
 }
 

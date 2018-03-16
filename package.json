@@ -1,6 +1,6 @@
 {
   "name": "darvin-testing-framework",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "A framework for testing Darvin.ai bots.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "deep-assign": "^2.0.0",
+    "handlebars": "^4.0.11",
     "node-fetch": "^1.7.1",
     "uuid": "^3.1.0"
   }
