@@ -48,7 +48,7 @@ class TestingFramework {
                 }
 
                 if (spec.parameters) {
-                    scenario.parameters = Object.assign({}, scenario.parameters, spec.parameters);
+                    scenario.parameters = Object.assign({}, spec.parameters, scenario.parameters);
                 }
 
                 Object.keys(scenario).forEach(key => {
@@ -244,7 +244,7 @@ class TestingFramework {
         if (!context || Object.keys(context) === 0) {
             return message;
         }
-        
+
         return JSON.parse(this._handlebars.compile(JSON.stringify(message), { noEscape: true })(context));
     }
 }
