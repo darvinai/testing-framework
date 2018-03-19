@@ -59,6 +59,9 @@ The JSON specification must have the following properties:
 
 - `name` - This is the name of your chatbot. It will be used as a name for its own test suite
 - `botId` - The Id of the chatbot that is being tested
+- `sender` - Optional information about the sender
+    - `name` - The name of the sender, the default value is "test-user"
+    - `id` - The sender id is a combination of the sender name and uuid or this value
 - `channel` - An object that contains communication details of the target chatbot
     - `id` - Id of the system communication channel of the target chatbot
     - `token` - Verification token of the system communication channel of the target chatbot
@@ -96,12 +99,99 @@ The JSON specification must have the following properties:
 
     tf.describe(spec);
     ```
+- `mocks` - a dictionary that allows you to mock the responses of specific URLs and HTTP actions against those URLs
 
+    Example:
+
+    ```json
+    "mocks": {
+        "https://api.everlive.com/v1/niuqpjk7bubu0282/Functions/ValidateDate?doctorId=24806&date=2017.08.07": {
+            "GET": "OK"
+        }
+    }
+    ```
+    
+    _This mocked response applies for all scenarios._
+- `contextMock` - Object that will be merged with the session context, used to fast forward a conversation to specific state or change `_system` properties
+
+    _The contextMock applies for all scenarios._
+
+    Example:
+
+    ```json
+    "contextMock": {
+        "_system": {
+            "channel": {
+                "ProviderName": "facebook"
+            }
+        },
+        "date": "March 2018",
+        "_raw": {
+            "date": "01.03.2018"
+        }
+    }
+    ```
+- `parameters` - You can provide a dictionary of frequently used strings in your tests, e.g. urls, and use them in the tests definitions with the handlebars format
+
+    _These parameters will be applied to all scenarios._
+
+    Example:
+
+    ```json
+    "parameters": {
+        "webviewsUrl": "https://webviews.darvin.ai/v1/bots/"
+    },
+    "scenarios": [
+        {
+            "it": "test name",
+            "steps": [
+                {
+                    "user": {
+                        "text": "some user message"
+                    },
+                    "bot": [
+                        [
+                            {
+                                "text": "What is your country of residence?",
+                                "template": {
+                                    "type": "button",
+                                    "buttons": [
+                                        {
+                                            "url": "{{webviewsUrl}}",
+                                            "title": "Choose a country"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    ]
+                }
+            ]
+        }
+    ```
+ 
 - `scenarios` - an array of scenarios describing the chatbot's behavior
-    - `it` - follows the idea of [behavior-driven development](https://en.wikipedia.org/wiki/Behavior-driven_development) and serves as the first word in the test name, which should be a complete sentence
+    - `it`, `fit` or `xit` - follows the idea of [behavior-driven development](https://en.wikipedia.org/wiki/Behavior-driven_development) and serves as the first word in the test name, which should be a complete sentence
+        - `fit` - if there are tests defined with `fit`, only those tests will be executed, otherwise all `it` tests will be executed
+        - `xit` - tests defined with `xit` will not be executed
+    - `mocks` - The same as spec definition mocks, but applies only to the scenario steps
+    - `contextMock` - The same as spec definition contextMock, applies only to this scenario
+    - `parameters` - The same as spec definition parameters, applies only to this scenario
     - `steps` - sequence (array) of steps defining the scenario
         - `user` - what the user says as a single message
             - `text` - text of the message
+            - `location` - location object with latitude and longitude
+
+                Example:
+
+                ```json
+                 "user": {
+                        "location": {
+                            "latitude": 42.6977082,
+                            "longitude": 23.3218675
+                        }
+                    }
+                ```
         - `bot` - what is the expected answer from the bot as an array of optional behavior. Each element is an array of messages. The step is considered valid if any sequence of messages matches the actual chatbot response
             - `text` - text of a single message or an array of possible messages
             - `quickReplies` - array of quick reply options
@@ -121,34 +211,9 @@ The JSON specification must have the following properties:
                 
                 _Note: the 'url' is checked for starts-with instead of equality_
                 
-            - `mocks` - a dictionary that allows you to mock the responses of specific URLs and HTTP actions against those URLs
-                
-                Example:
-                
-                ```json
-                "mocks": {
-                    "https://api.everlive.com/v1/niuqpjk7bubu0282/Functions/GetDoctorDays?doctorId=24806": {
-                        "GET": ["2017-08-07", "2017-08-15", "2017-08-24"]
-                    }
-                }
-                ```
-
-                _This mocked response applies only when the bot is responding to the message in the current step._
-
-    - `mocks` - a dictionary that allows you to mock the responses of specific URLs and HTTP actions against those URLs
-
-        Example:
-
-        ```json
-        "mocks": {
-            "https://api.everlive.com/v1/niuqpjk7bubu0282/Functions/ValidateDate?doctorId=24806&date=2017.08.07": {
-                "GET": "OK"
-            }
-        }
-        ```
-        
-        _This mocked response applies for the whole scenario._
-            
+        - `mocks` - The same as spec definition mocks, but applies only when the bot is responding to the message in the current step.
+        - `contextMock` - The same as spec definition contextMock, but the contexts will be merged when the current step is reached.
+   
 
 ## Example specification
 
