@@ -150,6 +150,10 @@ class TestingFramework {
             body: JSON.stringify(payload)
         };
 
+        if (spec.headers) {
+            Object.assign(options.headers, spec.headers);
+        }
+
         return fetch(channelUrl, options)
             .then(response => {
                 if (response.status < 200 || response.status >= 300) {
