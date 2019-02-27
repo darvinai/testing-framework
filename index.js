@@ -211,9 +211,20 @@ class TestingFramework {
                 const expectedText = expectedResponse.text;
                 if (Array.isArray(expectedText)) {
                     return expectedText.includes(actualResponse.text);
-                } else {
-                    return expectedText === actualResponse.text;
                 }
+
+                return expectedText === actualResponse.text;
+            case 'textStartsWith':
+                const expectedText = expectedResponse.textStartsWith;
+
+                return actualResponse.text.startsWith(expectedText);
+            case 'textIncludes':
+                const expectedText = expectedResponse.textContains;
+                if (Array.isArray(expectedText)) {
+                    return expectedText.reduce((accumulator, currentValue) => accumulator && actualResponse.text.includes(currentValue));
+                }
+
+                return actualResponse.text.includes(expectedText);
             case 'template':
                 return this._verify(expectedResponse.template, actualResponse.template, this._verifyTemplate.bind(this));
             default:
