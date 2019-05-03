@@ -128,14 +128,15 @@ class TestingFramework {
             contextMock: deepAssign({}, spec.contextMock, scenario.contextMock, step.contextMock)
         });
 
-        message = this._formatMessage(message, scenario.parameters);
+        const context = Object.assign({}, scenario.parameters, { spec });
+        message = this._formatMessage(message, context);
 
         return this._send(spec, sender, message)
-            .then(response => this._verifyStep(step, response, scenario.parameters));
+            .then(response => this._verifyStep(step, response, context));
     }
 
     _send(spec, sender, message) {
-        const channelUrl = `${this._apiUrl}v1/bots/${spec.botId}/channels/${spec.channel.id}/darvin`;
+        const channelUrl = `${this._apiUrl}v1/bots/${spec.proxyBotId || spec.botId}/channels/${spec.channel.id}/darvin`;
         const payload = {
             sender,
             message
@@ -207,29 +208,32 @@ class TestingFramework {
 
     _verifyResponse(expectedResponse, actualResponse, key) {
         switch (key) {
-            case 'text':
+            case 'text': {
                 const expectedText = expectedResponse.text;
                 if (Array.isArray(expectedText)) {
                     return expectedText.includes(actualResponse.text);
                 }
 
                 return expectedText === actualResponse.text;
-            case 'textStartsWith':
+            }
+            case 'textStartsWith': {
                 const expectedText = expectedResponse.textStartsWith;
 
                 return actualResponse.text.startsWith(expectedText);
-            case 'textIncludes':
+            }
+            case 'textIncludes': {
                 const expectedText = expectedResponse.textContains;
                 if (Array.isArray(expectedText)) {
                     return expectedText.reduce((accumulator, currentValue) => accumulator && actualResponse.text.includes(currentValue));
                 }
 
                 return actualResponse.text.includes(expectedText);
+            }
             case 'template':
                 return this._verify(expectedResponse.template, actualResponse.template, this._verifyTemplate.bind(this));
             default:
                 return JSON.stringify(expectedResponse[key]) === JSON.stringify(actualResponse[key]);
-        };
+        }
     }
 
     _verifyTemplate(expectedTemplate, actualTemplate, key) {
