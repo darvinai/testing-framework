@@ -17,6 +17,7 @@ class TestingFramework {
     }
 
     describe(spec, options) {
+
         if (!spec.name) {
             throw Error('Tried to execute a spec without a name.');
         }
@@ -45,10 +46,6 @@ class TestingFramework {
                 if (scenario.parameters) {
                     this._validateParameters(scenario.parameters);
                     Object.assign(scenario.parameters, parameters);
-                }
-
-                if (spec.parameters) {
-                    scenario.parameters = Object.assign({}, spec.parameters, scenario.parameters);
                 }
 
                 Object.keys(scenario).forEach(key => {
@@ -102,6 +99,10 @@ class TestingFramework {
 
         if (!spec.channel) {
             throw Error(`The spec '${spec.name}' does not have 'channel' configured.`);
+        }
+
+        if (spec.parameters) {
+            scenario.parameters = Object.assign({}, spec.parameters, scenario.parameters);
         }
 
         const that = this;
