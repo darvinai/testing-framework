@@ -223,7 +223,7 @@ class TestingFramework {
                 return actualResponse.text.startsWith(expectedText);
             }
             case 'textIncludes': {
-                const expectedText = expectedResponse.textContains;
+                const expectedText = expectedResponse.textIncludes;
                 if (Array.isArray(expectedText)) {
                     return expectedText.reduce((accumulator, currentValue) => accumulator && actualResponse.text.includes(currentValue));
                 }
