@@ -17,66 +17,68 @@ class TestingFramework {
     }
 
     describe(specs, options) {
-        if (!Array.isArray(specs)) {
-            specs = [specs];
-        }
-
-        if (options && options.setup && typeof options.setup === 'function') {
-            beforeAll(options.setup);
-        }
-
-        if (options && options.teardown && typeof options.teardown === 'function') {
-            afterAll(options.teardown);
-        }
-
-        specs.forEach(spec => {
-            if (!spec.name) {
-                throw Error('Tried to execute a spec without a name.');
+        describe("Spec root", () => {
+            if (!Array.isArray(specs)) {
+                specs = [specs];
             }
 
-            if (!spec.scenarios) {
-                throw Error(`The spec '${spec.name}' does not have 'scenarios'.`);
+            if (options && options.setup && typeof options.setup === 'function') {
+                beforeAll(options.setup);
             }
 
-            const that = this;
-            describe(spec.name, () => {
+            if (options && options.teardown && typeof options.teardown === 'function') {
+                afterAll(options.teardown);
+            }
 
-                if (spec.parameters) {
-                    this._validateParameters(spec.parameters);
+            specs.forEach(spec => {
+                if (!spec.name) {
+                    throw Error('Tried to execute a spec without a name.');
                 }
 
-                spec.scenarios.forEach(scenario => {
-                    that._validateScenario(spec, scenario);
+                if (!spec.scenarios) {
+                    throw Error(`The spec '${spec.name}' does not have 'scenarios'.`);
+                }
 
-                    if (scenario.parameters) {
-                        this._validateParameters(scenario.parameters);
-                        Object.assign(scenario.parameters, parameters);
+                const that = this;
+                describe(spec.name, () => {
+
+                    if (spec.parameters) {
+                        this._validateParameters(spec.parameters);
                     }
 
-                    Object.keys(scenario).forEach(key => {
-                        switch (key) {
-                            case 'it':
-                                it(scenario.it, done => that._executeScenario(spec, scenario, done));
-                                break;
-                            case 'fit':
-                                fit(scenario.fit, done => that._executeScenario(spec, scenario, done));
-                                break;
-                            case 'xit':
-                                xit(scenario.xit, done => that._executeScenario(spec, scenario, done));
-                                break;
+                    spec.scenarios.forEach(scenario => {
+                        that._validateScenario(spec, scenario);
+
+                        if (scenario.parameters) {
+                            this._validateParameters(scenario.parameters);
+                            Object.assign(scenario.parameters, parameters);
                         }
+
+                        Object.keys(scenario).forEach(key => {
+                            switch (key) {
+                                case 'it':
+                                    it(scenario.it, done => that._executeScenario(spec, scenario, done));
+                                    break;
+                                case 'fit':
+                                    fit(scenario.fit, done => that._executeScenario(spec, scenario, done));
+                                    break;
+                                case 'xit':
+                                    xit(scenario.xit, done => that._executeScenario(spec, scenario, done));
+                                    break;
+                            }
+                        });
                     });
+
+
+                    if (spec.dynamic && typeof spec.dynamic === 'function') {
+                        const sender = this._getSender();
+                        const context = {
+                            send: message => this._send(spec, sender, message)
+                        };
+
+                        spec.dynamic(context);
+                    }
                 });
-
-
-                if (spec.dynamic && typeof spec.dynamic === 'function') {
-                    const sender = this._getSender();
-                    const context = {
-                        send: message => this._send(spec, sender, message)
-                    };
-
-                    spec.dynamic(context);
-                }
             });
         });
     }
