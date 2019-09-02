@@ -1,6 +1,6 @@
 {
   "name": "darvin-testing-framework",
-  "version": "1.13.1",
+  "version": "2.0.0",
   "description": "A framework for testing Kinvey Chat bots.",
   "main": "index.js",
   "scripts": {
