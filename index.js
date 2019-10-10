@@ -17,7 +17,9 @@ class TestingFramework {
     }
 
     describe(specs, options) {
-        describe("Spec root", () => {
+        options = options || {};
+        options.rootDescribeName = options.rootDescribeName || "Spec root";
+        describe(options.rootDescribeName, () => {
             if (!Array.isArray(specs)) {
                 specs = [specs];
             }
