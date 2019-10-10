@@ -1,7 +1,7 @@
 {
   "name": "darvin-testing-framework",
   "version": "2.1.0",
-  "description": "A framework for testing NativeChat bots.",
+  "description": "A framework for testing Progress NativeChat bots.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/darvinai/testing-framework.git"
   },
-  "author": "Darvin.ai",
+  "author": "Progress Software",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/darvinai/testing-framework/issues"
