@@ -195,7 +195,7 @@ class TestingFramework {
             });
 
             if (!isValidResponse) {
-                throw Error(`UNEXPECED RESPONSE. \nEXPECT: ${JSON.stringify(step.bot)}. \nACTUAL: ${JSON.stringify(response)}`);
+                throw Error(`UNEXPECTED RESPONSE. \nEXPECT: ${JSON.stringify(step.bot)}. \nACTUAL: ${JSON.stringify(response)}`);
             }
         }
     }
