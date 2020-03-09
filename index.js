@@ -185,7 +185,7 @@ class TestingFramework {
 
             const isValidResponse = step.bot.some(expectedResponses => {
                 if (expectedResponses.length !== response.length) {
-                    console.error(`RESPONSES LENGHT DOES NOT MATCH:\nEXPECT: ${expectedResponses.length}\nACTUAL: ${response.length}`);
+                    console.error(`RESPONSES LENGTH DOES NOT MATCH:\nEXPECT: ${expectedResponses.length}\nACTUAL: ${response.length}`);
                     return false;
                 }
 
