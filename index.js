@@ -185,6 +185,7 @@ class TestingFramework {
 
             const isValidResponse = step.bot.some(expectedResponses => {
                 if (expectedResponses.length !== response.length) {
+                    console.error(`RESPONSES LENGTHS DO NOT MATCH:\nEXPECT: ${expectedResponses.length}\nACTUAL: ${response.length}`);
                     return false;
                 }
 
@@ -194,7 +195,7 @@ class TestingFramework {
             });
 
             if (!isValidResponse) {
-                throw Error(`Unexpected response. Expected: ${JSON.stringify(step.bot)}. Actual: ${JSON.stringify(response)}`);
+                throw Error(`UNEXPECTED RESPONSE. \nEXPECT: ${JSON.stringify(step.bot)}. \nACTUAL: ${JSON.stringify(response)}`);
             }
         }
     }
@@ -202,6 +203,7 @@ class TestingFramework {
     _verify(expected, actual, validation) {
         let keys = Object.keys(expected);
         if (Object.keys(actual).length !== keys.length) {
+            console.error(`KEYS DOES NOT MATCH:\nKEYS EXPECT: ${keys}\nKEYS ACTUAL: ${Object.keys(actual)}`);
             return false;
         }
 
@@ -209,7 +211,7 @@ class TestingFramework {
             let isValid = validation(expected, actual, key);
 
             if (!isValid) {
-                return false;
+                throw Error(`FAILED VERIFICATION:\nKEY: ${key}\nEXPECT: ${JSON.stringify(expected)}\nACTUAL: ${JSON.stringify(actual)}`);
             }
         }
 
