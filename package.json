@@ -1,6 +1,6 @@
 {
   "name": "darvin-testing-framework",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A framework for testing Progress NativeChat bots.",
   "main": "index.js",
   "scripts": {
