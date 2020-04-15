@@ -146,6 +146,7 @@ class TestingFramework {
     }
 
     _send(spec, sender, message) {
+        console.log(`SEND: ${message.text}`);
         const channelUrl = `${this._apiUrl}/bots/${spec.proxyBotId || spec.botId}/channels/${spec.channel.id}/darvin`;
         const payload = {
             sender,
